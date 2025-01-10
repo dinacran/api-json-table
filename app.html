@@ -9,7 +9,7 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 10px;
+            padding: 0;
             background-color: #121212;
             color: #e0e0e0;
         }
@@ -104,14 +104,12 @@
         th {
             background-color: #f4f4f431;
         }
-
-        #dataContainer{
-            padding: auto;
-        }
     </style>
 </head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/json.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
-
 
 <body>
     <input type="text" id="docId" placeholder="Enter docId">
@@ -126,17 +124,25 @@
     <label>
         <input type="radio" name="viewMode" onclick="format()" value="table"> Table
     </label>
+    <label>
+        <input type="radio" name="dataToView" onclick="format()" value="Response"checked> Response
+    </label>
+    <label>
+        <input type="radio" name="dataToView" onclick="format()" value="Request"> Request
+    </label>
+    <label>
+        <input type="radio" name="dataToView" onclick="format()" value="Bundler"> Bundler
+    </label>
     <button id="printExcel" onclick="printExcel()">Export to xlsx</button>
-    <div id="dataContainer">
-    <pre class="pre-flex" id="responseOutput"></pre>
-    <pre class="pre-flex" id="requestOutput"></pre>
-    <pre class="pre-flex" id="bundlerOutput"></pre>
-    </div>
+    <pre id="dataContainer"></pre>
+
 <script>
     var jsonData = null;
     const dataContainer = document.getElementById('dataContainer');
     const table = document.createElement('table');
+    let responseMap = new Map();
     async function fetchJSON() {
+        responseMap.clear();
         const doc = document.getElementById('docId').value;
         const client = document.getElementById('clients').value;
         if (client == "--select client--") {
@@ -156,12 +162,14 @@
         const bundlerUri = "https://rbr-qa.nonprod.aws.casualty.cccis.com/service-gateway/api/recommendations/" + client + "?docId=" + doc
             + "&category=bundlerRecommendation";
 
-        const uris = [responseUri, requestUri, bundlerUri];
         const token = document.getElementById('tokenInput').value;
 
-        uris.forEach(async (uri) => {
+        const uriMap = {'Response':'http://127.0.0.1:5000/response', 
+                         'Request':'http://127.0.0.1:5000/request', 
+                         'Bundler':'http://127.0.0.1:5000/bundler'};
+        Object.keys(uriMap).forEach(async (uri) => {
             try {
-                const response = await fetch(uri, {
+                const response = await fetch(uriMap[uri], {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -170,9 +178,10 @@
                     throw new Error('Network response was not ok ' + response.statusText);
                 }
                 const responseData = await response.json();
-                document.getElementById('responseOutput').textContent = JSON.stringify(responseData, null, 2);
-            } catch (error) {
-                document.getElementById('responseOutput').textContent = 'Error: ' + error.message;
+
+                responseMap.set(uri, responseData);
+           } catch (error) {
+                responseMap.set(uri, 'Error: ' + error.message);
             }
 
         });
@@ -180,10 +189,19 @@
     function format() {
         dataContainer.innerHTML = '';
         const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
+        const dataToView = document.querySelector('input[name="dataToView"]:checked').value;
+        jsonData = responseMap.get(dataToView);
         if (viewMode === 'text') {
-            dataContainer.textContent = JSON.stringify(jsonData, null, 2);
-            hljs.highlightElement(dataContainer);
+            var dataPre = document.createElement('pre');
+            dataPre.textContent = JSON.stringify(jsonData, null, 2);
+            dataContainer.appendChild(dataPre);
+            try {
+                hljs.highlightElement(dataContainer);
+            } catch (error) {
+                console.log(error);
+            }            
         } else if (viewMode === 'table') {
+            generateTable();
             if (jsonData === null || jsonData === '') return;
             dataContainer.appendChild(table);
         }
@@ -194,7 +212,7 @@
         if (!Array.isArray(jsonData)) jsonData = [jsonData];
         const thead = document.createElement('thead');
         const tbody = document.createElement('tbody');
-        const headers = Object.keys(jsonData[0]);
+        var headers = Object.keys(jsonData[0]);
         const headerRow = document.createElement('tr');
         headers.forEach(header => {
             const th = document.createElement('th');
@@ -217,11 +235,11 @@
 
 
 
-    function printExcel(jsonData) {
+    function printExcel() {
 
         const workbook = XLSX.utils.book_new();
 
-        const worksheet = XLSX.utils.json_to_sheet(jsonData);
+        const worksheet = XLSX.utils.table_to_sheet(table);
 
         XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
