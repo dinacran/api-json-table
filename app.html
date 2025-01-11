@@ -104,6 +104,40 @@
         th {
             background-color: #f4f4f431;
         }
+    
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+    
+        .modal-content {
+            background-color: rgb(0, 0, 0);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid rgb(0, 0, 0)000;
+            width: 80%;
+        }
+    
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+    
+        .close:hover,
+        .close:focus {
+            color: rgb(75, 75, 75);
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
@@ -134,12 +168,17 @@
         <input type="radio" name="dataToView" onclick="format()" value="Bundler"> Bundler
     </label>
     <button id="printExcel" onclick="printExcel()">Export to xlsx</button>
-    <pre id="dataContainer"></pre>
+    <pre id="dataContainer"></div></pre>
 
+    <div id="modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <div id="nestedTable"></div>
+        </div>
+      </div>
 <script>
     var jsonData = null;
     const dataContainer = document.getElementById('dataContainer');
-    const table = document.createElement('table');
     let responseMap = new Map();
     async function fetchJSON() {
         responseMap.clear();
@@ -164,9 +203,11 @@
 
         const token = document.getElementById('tokenInput').value;
 
-        const uriMap = {'Response':'http://127.0.0.1:5000/response', 
-                         'Request':'http://127.0.0.1:5000/request', 
-                         'Bundler':'http://127.0.0.1:5000/bundler'};
+        const uriMap = {
+            'Response': 'http://127.0.0.1:5000/response',
+            'Request': 'http://127.0.0.1:5000/request',
+            'Bundler': 'http://127.0.0.1:5000/bundler'
+        };
         Object.keys(uriMap).forEach(async (uri) => {
             try {
                 const response = await fetch(uriMap[uri], {
@@ -180,7 +221,7 @@
                 const responseData = await response.json();
 
                 responseMap.set(uri, responseData);
-           } catch (error) {
+            } catch (error) {
                 responseMap.set(uri, 'Error: ' + error.message);
             }
 
@@ -199,38 +240,96 @@
                 hljs.highlightElement(dataContainer);
             } catch (error) {
                 console.log(error);
-            }            
+            }
         } else if (viewMode === 'table') {
-            generateTable();
             if (jsonData === null || jsonData === '') return;
-            dataContainer.appendChild(table);
+            generateTable(jsonData, "dataContainer");
         }
     }
 
-    function generateTable() {
-        table.innerHTML = '';
-        if (!Array.isArray(jsonData)) jsonData = [jsonData];
-        const thead = document.createElement('thead');
-        const tbody = document.createElement('tbody');
-        var headers = Object.keys(jsonData[0]);
-        const headerRow = document.createElement('tr');
-        headers.forEach(header => {
-            const th = document.createElement('th');
-            th.textContent = header;
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        jsonData.forEach(row => {
-            const tr = document.createElement('tr');
+    function generateTable(data, containerId) {
+        var table = document.createElement('table');
+
+
+    var container = document.getElementById(containerId);
+        const isArray = Array.isArray(data);
+
+        if (isArray && typeof data[0] !== "string") {
+         
+            var headers = Object.keys(data[0]);
+            console.log(headers);
+            const headerRow = document.createElement('tr');
             headers.forEach(header => {
-                const td = document.createElement('td');
-                td.textContent = row[header];
-                tr.appendChild(td);
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
             });
-            tbody.appendChild(tr);
-        });
-        table.appendChild(thead);
-        table.appendChild(tbody);
+            table.appendChild(headerRow);
+
+            data.forEach(rowData => {
+                const row = document.createElement('tr');
+                headers.forEach(header => {
+                    const cell = document.createElement('td');
+                    const value = rowData[header];
+                    if (typeof value === "object" && value !== null && value.length !== 0 && typeof value[0] !== 'string') {
+                        const link = document.createElement("a");
+                        link.href = "#";
+                        link.textContent = "[...]";
+                        link.onclick = function () {
+                            openModal(value);
+                        };
+                        cell.appendChild(link);
+                    } else {
+                        cell.textContent = value;
+                    } row.appendChild(cell);
+                });
+                table.appendChild(row);
+            });
+            container.innerHTML = ""; 
+            container.appendChild(table);
+
+        }
+        else {
+            for (let key in data) {
+                const row = document.createElement("tr");
+
+                const cell1 = document.createElement("td");
+                cell1.textContent = key;
+
+                const cell2 = document.createElement("td");
+                const value = data[key];
+
+                if (typeof value === "object" && value !== null && value.length !== 0 && typeof value[0] !== 'string') {
+                    const link = document.createElement("a");
+                    link.href = "#";
+                    link.textContent = "[..]";
+                    link.onclick = function () {
+                        openModal(value);
+                    };
+                    cell2.appendChild(link);
+                } else {
+                    cell2.textContent = value;
+                }
+
+                row.appendChild(cell1);
+                row.appendChild(cell2);
+                table.appendChild(row);
+            }
+
+            container.innerHTML = ""; 
+            container.appendChild(table);
+        }
+    }
+
+    function openModal(data) {
+      const modal = document.getElementById("modal");
+      generateTable(data, "nestedTable");
+      modal.style.display = "block";
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("modal");
+      modal.style.display = "none";
     }
 
 
