@@ -170,14 +170,15 @@
     <button id="printExcel" onclick="printExcel()">Export to xlsx</button>
     <pre id="dataContainer"></div></pre>
 
-    <div id="modal" class="modal">
+    <!-- <div id="modal" class="modal">
         <div class="modal-content">
           <span class="close" onclick="closeModal()">&times;</span>
-          <div id="nestedTable"></div>
+          <div id="nestedTale"></div>
         </div>
-      </div>
+      </div> -->
 <script>
     var jsonData = null;
+    var id = 0;
     const dataContainer = document.getElementById('dataContainer');
     let responseMap = new Map();
     async function fetchJSON() {
@@ -251,11 +252,11 @@
         var table = document.createElement('table');
 
 
-    var container = document.getElementById(containerId);
+        var container = document.getElementById(containerId);
         const isArray = Array.isArray(data);
 
         if (isArray && typeof data[0] !== "string") {
-         
+
             var headers = Object.keys(data[0]);
             console.log(headers);
             const headerRow = document.createElement('tr');
@@ -285,7 +286,7 @@
                 });
                 table.appendChild(row);
             });
-            container.innerHTML = ""; 
+            // container.innerHTML = "";
             container.appendChild(table);
 
         }
@@ -316,20 +317,51 @@
                 table.appendChild(row);
             }
 
-            container.innerHTML = ""; 
+            // container.innerHTML = "";
             container.appendChild(table);
         }
     }
 
     function openModal(data) {
-      const modal = document.getElementById("modal");
-      generateTable(data, "nestedTable");
-      modal.style.display = "block";
+        // const modal = document.getElementById("modal");
+        const modal = createModal();
+        document.body.appendChild(modal);
+        generateTable(data, "nestedTable"+id);
+        modal.style.display = "block";
+    }
+
+    function createModal() {
+        const modal = document.createElement("div");
+        modal.classList.add("modal");
+
+        const modalContent = document.createElement("div");
+        modalContent.classList.add("modal-content");
+
+
+        const closeButton = document.createElement("span");
+        closeButton.classList.add("close");
+        closeButton.innerHTML = "&times;";
+        closeButton.onclick = function () {
+            modal.style.display = "none";
+            document.body.removeChild(modal);
+        };
+
+        modalContent.appendChild(closeButton);
+
+        const nestedTable = document.createElement("div");
+        nestedTable.id = "nestedTable"+ ++id;
+
+        modalContent.appendChild(nestedTable);
+
+
+        modal.appendChild(modalContent);
+
+        return modal;
     }
 
     function closeModal() {
-      const modal = document.getElementById("modal");
-      modal.style.display = "none";
+        const modal = document.getElementById("modal");
+        modal.style.display = "none";
     }
 
 
