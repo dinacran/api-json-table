@@ -7,19 +7,24 @@
     <title>json</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: monospace;
             margin: 0;
             padding: 0;
             background-color: black;
             color: #e0e0e0;
             overflow: hidden;
+
+        }
+        label{
+            font-family: monospace;
         }
     
         input[type="text"],
         select,
         button {
+            font-family: monospace;
             font-size: 16px;
-            margin: 10px;
+            margin-top: 10px;
             padding: 8px 12px;
             border: 1px solid #333;
             border-radius: 4px;
@@ -57,9 +62,45 @@
             margin-left: 10px;
             margin-right: 5px;
         }
+        input[type="radio"] {
+            appearance: none; 
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            accent-color: #007bff; 
+            vertical-align: sub;
+
+        }
+
+        input[type="radio"]:checked {
+            border: 6px solid #1e88e5;
+        }
+
+        label {
+
+            margin-right: 10px;
+        }
+        #viewmode-container{
+            border: 2px solid #333;
+            border-radius: 4px;
+            padding-top: 9px;
+            padding-bottom: 9px;
+        }
+        #dataToView-container{
+            margin-left: 10px;
+            margin-right: 10px;
+            border: 2px solid #333;
+            border-radius: 4px;
+            padding-top: 9px;
+            padding-bottom: 9px;
+        }
+        
     
         #dataContainer:not(:empty) {
-            margin: 10px 20px;
+            margin: 10px 10px;
             padding: 10px;
             border: 1px solid #333;
             border-radius: 4px;
@@ -67,7 +108,7 @@
             color: #e0e0e0;
             min-height: 0px;
             overflow: auto;
-            max-height: 86vh;
+            max-height: 87vh;
         }
     
         @media (max-width: 600px) {
@@ -80,7 +121,6 @@
             }
     
             #dataContainer {
-                margin: 10px 20px;
                 padding: 10px;
             }
         }
@@ -103,6 +143,11 @@
             text-align: left;
         }
     
+        td {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }    
         th {
             background-color: #f4f4f431;
         }
@@ -114,11 +159,7 @@
         }
     
         .modal {
-            display: grid;
-            place-content: center;
-            justify-content: center;
-            padding: 10px;
-    
+            padding: 10px;    
             position: fixed;
             z-index: 1;
             left: 0;
@@ -133,9 +174,11 @@
         .modal-content {
     
             background-color: #1e1e1e;
-            padding: 10px;
-            overflow: auto;
+            margin: 10% auto;
+            padding: 20px;
             border: 1px solid rgb(0, 0, 0);
+            overflow: scroll;
+            max-width: min-content;
             border-radius: 4px;
 
         }
@@ -279,12 +322,17 @@
     </select>
     <input type="text" id="tokenInput" placeholder="Enter Bearer Token">
     <button onclick="(async function(){ await fetchJSON()}); format();">Fetch</button>
+
+    <span id="viewmode-container">
     <label>
         <input type="radio" name="viewMode" value="text" onclick="format()" checked> JSON
     </label>
     <label>
         <input type="radio" name="viewMode" onclick="format()" value="table"> Table
     </label>
+    </span>
+
+    <span id="dataToView-container">
     <label>
         <input type="radio" name="dataToView" onclick="format()" value="Response"checked> Response
     </label>
@@ -294,7 +342,9 @@
     <label>
         <input type="radio" name="dataToView" onclick="format()" value="Bundler"> Bundler
     </label>
-    <button id="printExcel" onclick="printExcel()">Export to xlsx</button>
+    </span>
+    <button id="printExcel" onclick="printExcel()">Export to xl</button>
+    <button id="combine-data" onclick="printExcel()">Integrate</button>
     <span id="theme-toggler">
     <span class="material-symbols-outlined"> &ensp;light_mode </span>
     <label class="switch" onclick="switchTheme()">
@@ -315,6 +365,7 @@
     var globalTable = null;
 
    async function fetchJSON() {
+        dataContainer.innerHTML = '';
         responseMap.clear();
         const doc = document.getElementById('docId').value;
         const client = document.getElementById('clients').value;
@@ -327,23 +378,19 @@
         const uriMap = {
             'Response': 'http://127.0.0.1:5000/response',
             'Request': 'http://127.0.0.1:5000/request',
-            'Bundler': 'http://127.0.0.1:000/bundler'
+            'Bundler': 'http://127.0.0.1:5000/bundler'
         };
         for (const uri in uriMap) {
-            try {
-                const response = await fetch(uriMap[uri], {
+                await fetch(uriMap[uri], {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
+                }).then(response => response.json())
+                .then(data => {
+                    responseMap.set(uri, data);
+                }).catch(error => {
+                    responseMap.set(uri, 'Error: ' + error.message);
                 });
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                const responseData = await response.json();
-                responseMap.set(uri, responseData);
-            } catch (error) {
-                responseMap.set(uri, 'Error: ' + error.message);
-            }
         }
     }
 
@@ -358,9 +405,7 @@
         dataContainer.innerHTML = '';
         jsonData = responseMap.get(dataToView);
         if (viewMode === 'text') {
-            var dataPre = document.createElement('pre');
-            dataPre.textContent = JSON.stringify(jsonData, null, 2);
-            dataContainer.appendChild(dataPre);
+            dataContainer.textContent = JSON.stringify(jsonData, null, 2);
             hljs.highlightElement(dataContainer);
         } else if (viewMode === 'table') {
             if (jsonData === null || jsonData === '' || jsonData === 'Error: Failed to fetch') 
@@ -411,7 +456,14 @@
                         cell.appendChild(link);
                     } else {
                         cell.textContent = value;
-                    } row.appendChild(cell);
+                        
+                    } 
+                    cell.onclick = function () {
+                        if(cell.textContent !== '[...]' && cell.textContent !== '[..]'){
+                            window.alert(value);
+                        }
+                    };
+                    row.appendChild(cell);
                 });
                 table.appendChild(row);
             });
@@ -437,8 +489,18 @@
                     };
                     cell2.appendChild(link);
                 } else {
+                    if(value === null){
+                        cell2.textContent = 'null';
+                    } else {
                     cell2.textContent = value;
-                }
+                    }
+                } 
+                    cell2.onclick = function () {
+                        if(cell2.textContent !== '[...]' && cell2.textContent !== '[..]'){
+                            window.alert(value);
+
+                        }
+                    };
 
                 row.appendChild(cell1);
                 row.appendChild(cell2);
@@ -519,6 +581,9 @@
             const checkbox = document.getElementById("checkBox");
                 if (checkbox.checked) {
                     document.getElementById("body").style.backgroundColor = "white";
+                    document.querySelectorAll('label').forEach(function (element) { element.style.color = "black"; });
+                    document.querySelectorAll('input[type="text"], select').forEach(function (element) { element.style.color = "black"; });
+                    document.querySelectorAll('input[type="text"], select').forEach(function (element) { element.style.backgroundColor = "white"; });
                     document.getElementById("dataContainer").style.color = "black";
                     document.getElementById("dataContainer").style.backgroundColor = "white";
                     document.querySelectorAll('.hljs-attr').forEach(function (element) { element.style.color = "#3240ff"; });
@@ -531,6 +596,9 @@
                     document.getElementById("body").style.backgroundColor = "black";
                     document.getElementById("dataContainer").style.backgroundColor = "#1e1e1e";
                     document.getElementById("dataContainer").style.color = "white";
+                    document.querySelectorAll('label').forEach(function (element) { element.style.color = "white"; });
+                    document.querySelectorAll('input[type="text"], select').forEach(function (element) { element.style.color = "white"; });
+                    document.querySelectorAll('input[type="text"], select').forEach(function (element) { element.style.backgroundColor = "#1e1e1e"; });
                     document.querySelectorAll('.hljs-attr').forEach(function (element) { element.style.color = "#51b7ee"; });
                     document.querySelectorAll('.hljs-string').forEach(function (element) { element.style.color = "#CE9178"; });
                     document.querySelectorAll('.hljs-number').forEach(function (element) { element.style.color = "#16b887"; });
