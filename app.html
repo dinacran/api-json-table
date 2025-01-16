@@ -600,6 +600,18 @@
         XLSX.writeFile(workbook, "data.xlsx");
 
     }
+    function createCell(content) {
+
+        const cell = document.createElement('td');
+        cell.textContent = content || '';
+        return cell;
+   }
+
+   function createTHead(content) {
+        const thead = document.createElement('th');
+        thead.textContent = content || '';
+        return thead;
+    }
 
     function integrateData() {
         const response = responseMap.get('Response');
@@ -611,69 +623,113 @@
             return;
         }
 
-        const requestId = response[0]['requestId'];
-        const correlationId = response[0]['correlationId'];
-        const clientCode = response[0]['clientCode'];
-        const docId = response[0]['docId'];
-        const formType = response[0]['formType'].includes('cms') ? 'CMS-1500' : response[0]['formType'].includes('ub04') ? 'UB-04' : 'Non-Standard';
+        const docInfoMap = {
+            'docId': response[0]['docId'] || '', 
+            'requestId': response[0]['requestId'] || '', 
+            'correlationId': response[0]['correlationId'] || '',
+            'clientCode': response[0]['clientCode'] || '', 
+            'formType': response[0]['formType'].includes('cms') ? 'CMS-1500' : response[0]['formType'].includes('ub04') ? 'UB-04' : 'Non-Standard'
+        };
+
+        const formType = docInfoMap['formType'];
+
+        const docInfoKeyRow = document.createElement('tr');
+        const docInfoValueRow = document.createElement('tr');
+
+
+        for (const docInfo in docInfoMap) {
+            docInfoKeyRow.appendChild(createTHead(docInfo));
+            docInfoValueRow.appendChild(createTHead(docInfoMap[docInfo]));
+        }
+
+        const integratedTable = document.createElement('table');
+
+        integratedTable.appendChild(docInfoKeyRow);
+        integratedTable.appendChild(docInfoValueRow);
+
         
-        const linesArray = []
+        const headers = ['lineNo', 'serviceDate', 'cptHcpcs', 'revenueCode', 'modifier1', 'modifier2', 'modifier3', 'modifier4', 'serviceUnits', 'totalCharges', 'appliedFlag', 'firedReimburseRule', 'firedDenyRule', 'bundlerRuleName', 'lineReimburse', 'lineRuleName', 'finalRc', 'finalReimburse'];
+        
+        const headerRow = document.createElement('tr');
+
+        const emptyRow = document.createElement('tr');
+
+        headers.forEach(h => {
+        
+        headerRow.appendChild(createTHead(h));
+
+        emptyRow.appendChild(createCell(''));
+
+        });
+
+        integratedTable.appendChild(emptyRow);
+
+        integratedTable.appendChild(headerRow);
+
+        const linesArray = [];
+
         request['request'][0]['bills'][0]['pages'].forEach(page => {
             page['lines'].forEach(line => {linesArray.push(line);});
         });
 
-        integratedTable = document.createElement('table');
-
-        for(let i in linesArray){
-
+        for (let i in linesArray) {
             const line = linesArray[i];
             const recs = response[i];
+            const lineId = recs['lineId'] || '';
 
             const row = document.createElement('tr');
 
-            const cell1 = document.createElement('td');
-            cell1.textContent = line['lineNo'].toString();
+            row.appendChild(createCell(line ? line['lineNo'] : ''));
 
-            const cell2 = document.createElement('td');
-            cell2.textContent = 
-                (formType == 'CMS-1500') ? 
-                                line['serviceDateFrom']['month'] + '/' + line['serviceDateFrom']['day'] + '/' + line['serviceDateFrom']['year'] : 
-                                formType == 'UB-04' ? line['inferredValues'][0]['value']:line['serviceDate']['month'] + '/' + line['serviceDate']['day'] + '/' + line['serviceDate']['year'];
-            
-            const cell3 = document.createElement('td');
-            cell3.textContent = (formType == 'CMS-1500') ? line['cptHcpcs']: formType == 'UB-04' ? line['inferredValues'][2]['value']:line['cptHcpcs'];
+            if (formType == 'CMS-1500') {
+                row.appendChild(createCell(line['serviceDateFrom']['month'] + '/' + line['serviceDateFrom']['day'] + '/' + line['serviceDateFrom']['year']));
+                row.appendChild(createCell(line['cptHcpcs']));
+                row.appendChild(createCell(line['modifier1']));
+                row.appendChild(createCell(line['modifier2']));
+                row.appendChild(createCell(line['modifier3']));
+                row.appendChild(createCell(line['modifier4']));
+                row.appendChild(createCell(line['daysOrUnits']));
+                row.appendChild(createCell(line['charges']));
+            } else if (formType == 'UB-04') {
+                row.appendChild(createCell(line['inferredValues'][0]['value']));
+                row.appendChild(createCell(line['inferredValues'][2]['value']));
+                row.appendChild(createCell(line['inferredValues'][3]['values'][0]));
+                row.appendChild(createCell(line['inferredValues'][3]['values'][1]));
+                row.appendChild(createCell(line['inferredValues'][3]['values'][2]));
+                row.appendChild(createCell(line['inferredValues'][3]['values'][3]));
+                row.appendChild(createCell(line['serviceUnits']));
+                row.appendChild(createCell(line['totalCharges']));
+            } else {
+                row.appendChild(createCell(line['serviceDate']['month'] + '/' + line['serviceDate']['day'] + '/' + line['serviceDate']['year']));
+                row.appendChild(createCell(line['cptHcpcs']));
+                row.appendChild(createCell(line['modifiers'][0]));
+                row.appendChild(createCell(line['modifiers'][1]));
+                row.appendChild(createCell(line['modifiers'][2]));
+                row.appendChild(createCell(line['modifiers'][3]));
+                row.appendChild(createCell(line['daysOrUnits']));
+                row.appendChild(createCell(line['charges']));
+            }
 
-            const cell4 = document.createElement('td');
-            cell4.textContent = (formType == "Non-Standard" || formType == "UB-04") ? line['revenueCode'] : '';
-
-            const cell5 = document.createElement('td');
-            cell5.textContent = (formType == "CMS-1500")? line['modifier1'] : (formType == "UB-04") ? line['inferredValues'][3]['values'][0] : line['modifiers'][0];
-
-            const cell6 = document.createElement('td');
-            cell6.textContent = (formType == "CMS-1500")? line['modifier2'] : (formType == "UB-04") ? line['inferredValues'][3]['values'][1] : line['modifiers'][1];
-
-            const cell7 = document.createElement('td');
-            cell7.textContent = (formType == "CMS-1500")? line['modifier3'] : (formType == "UB-04") ? line['inferredValues'][3]['values'][2] : line['modifiers'][2];    
-
-            const cell8 = document.createElement('td');
-            cell8.textContent = (formType == "CMS-1500")? line['modifier4'] : (formType == "UB-04") ? line['inferredValues'][3]['values'][3] : line['modifiers'][3];
-
-            const cell9 = document.createElement('td');
-            cell9.textContent = (formType == "CMS-1500")? line['daysOrUnits'] : (formType == "UB-04") ? line['serviceUnits'] : line['daysOrUnits'];
-
-            const cell10 = document.createElement('td');
-            cell10.textContent = (formType == "CMS-1500")? line['charges'] : (formType == "UB-04") ? line['totalCharges'] : line['charges'];
-
-            row.appendChild(cell1);
-            row.appendChild(cell2);
-            row.appendChild(cell3);
-            row.appendChild(cell4);
-            row.appendChild(cell5);
+            row.appendChild(createCell((formType == "Non-Standard" || formType == "UB-04") ? line['revenueCode'] : ''));
+            row.appendChild(createCell(recs['appliedFlag']));
+            row.appendChild(createCell(recs['firedReimburseRule']));
+            row.appendChild(createCell(recs['firedDenyRule']));
+            const firedBundlerRules = [];
+            if(bundler)
+            bundler['recommendationSets']['recommendations'].filter(recommendation => recommendation['targetReference'].includes(lineId)).map(recommendation => recommendation['rule']['name']).forEach(ruleName => firedBundlerRules.push(ruleName));
+            row.appendChild(createCell(firedBundlerRules));
+            row.appendChild(createCell(recs['bundlerRuleName']));
+            row.appendChild(createCell(recs['lineReimburse']));
+            row.appendChild(createCell(recs['lineRuleName']));
+            row.appendChild(createCell(recs['finalRc']));
+            row.appendChild(createCell(recs['finalReimburse']));
 
             integratedTable.appendChild(row);
         }
+
         
         dataContainer.innerHTML = '';
+
         dataContainer.appendChild(integratedTable);
     }
 
