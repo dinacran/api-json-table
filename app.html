@@ -112,7 +112,7 @@
             color: #e0e0e0;
             min-height: 0px;
             overflow: auto;
-            max-height: 87vh;
+            max-height: 112vh;
         }
     
         @media (max-width: 600px) {
@@ -348,7 +348,7 @@
     </label>
     </span>
     <button id="printExcel" onclick="printExcel()">Export to xl</button>
-    <button id="combine-data" onclick="printExcel()">Integrate</button>
+    <button id="combine-data" onclick="integrateData()">Integrate</button>
     <span id="theme-toggler">
     <span class="material-symbols-outlined"> &ensp;light_mode </span>
     <label class="switch" onclick="switchTheme()">
@@ -400,9 +400,9 @@
                             + "&category=bundlerRecommendation";
         
         const uriMap = {
-            'Response': responseUri,
-            'Request': requestUri,
-            'Bundler': bundlerUri
+            'Response': 'http://127.0.0.1:5000/response',
+            'Request': 'http://127.0.0.1:5000/request',
+            'Bundler': 'http://127.0.0.1:5000/bundler'
         };
         for (const uri in uriMap) {
                 await fetch(uriMap[uri], {
@@ -599,6 +599,82 @@
 
         XLSX.writeFile(workbook, "data.xlsx");
 
+    }
+
+    function integrateData() {
+        const response = responseMap.get('Response');
+        const request = responseMap.get('Request');
+        const bundler = responseMap.get('Bundler');
+
+        if (response === 'Error: Failed to fetch' || request === 'Error: Failed to fetch' || bundler === 'Error: Failed to fetch') {
+            window.alert('Please fetch the data first');
+            return;
+        }
+
+        const requestId = response[0]['requestId'];
+        const correlationId = response[0]['correlationId'];
+        const clientCode = response[0]['clientCode'];
+        const docId = response[0]['docId'];
+        const formType = response[0]['formType'].includes('cms') ? 'CMS-1500' : response[0]['formType'].includes('ub04') ? 'UB-04' : 'Non-Standard';
+        
+        const linesArray = []
+        request['request'][0]['bills'][0]['pages'].forEach(page => {
+            page['lines'].forEach(line => {linesArray.push(line);});
+        });
+
+        integratedTable = document.createElement('table');
+
+        for(let i in linesArray){
+
+            const line = linesArray[i];
+            const recs = response[i];
+
+            const row = document.createElement('tr');
+
+            const cell1 = document.createElement('td');
+            cell1.textContent = line['lineNo'].toString();
+
+            const cell2 = document.createElement('td');
+            cell2.textContent = 
+                (formType == 'CMS-1500') ? 
+                                line['serviceDateFrom']['month'] + '/' + line['serviceDateFrom']['day'] + '/' + line['serviceDateFrom']['year'] : 
+                                formType == 'UB-04' ? line['inferredValues'][0]['value']:line['serviceDate']['month'] + '/' + line['serviceDate']['day'] + '/' + line['serviceDate']['year'];
+            
+            const cell3 = document.createElement('td');
+            cell3.textContent = (formType == 'CMS-1500') ? line['cptHcpcs']: formType == 'UB-04' ? line['inferredValues'][2]['value']:line['cptHcpcs'];
+
+            const cell4 = document.createElement('td');
+            cell4.textContent = (formType == "Non-Standard" || formType == "UB-04") ? line['revenueCode'] : '';
+
+            const cell5 = document.createElement('td');
+            cell5.textContent = (formType == "CMS-1500")? line['modifier1'] : (formType == "UB-04") ? line['inferredValues'][3]['values'][0] : line['modifiers'][0];
+
+            const cell6 = document.createElement('td');
+            cell6.textContent = (formType == "CMS-1500")? line['modifier2'] : (formType == "UB-04") ? line['inferredValues'][3]['values'][1] : line['modifiers'][1];
+
+            const cell7 = document.createElement('td');
+            cell7.textContent = (formType == "CMS-1500")? line['modifier3'] : (formType == "UB-04") ? line['inferredValues'][3]['values'][2] : line['modifiers'][2];    
+
+            const cell8 = document.createElement('td');
+            cell8.textContent = (formType == "CMS-1500")? line['modifier4'] : (formType == "UB-04") ? line['inferredValues'][3]['values'][3] : line['modifiers'][3];
+
+            const cell9 = document.createElement('td');
+            cell9.textContent = (formType == "CMS-1500")? line['daysOrUnits'] : (formType == "UB-04") ? line['serviceUnits'] : line['daysOrUnits'];
+
+            const cell10 = document.createElement('td');
+            cell10.textContent = (formType == "CMS-1500")? line['charges'] : (formType == "UB-04") ? line['totalCharges'] : line['charges'];
+
+            row.appendChild(cell1);
+            row.appendChild(cell2);
+            row.appendChild(cell3);
+            row.appendChild(cell4);
+            row.appendChild(cell5);
+
+            integratedTable.appendChild(row);
+        }
+        
+        dataContainer.innerHTML = '';
+        dataContainer.appendChild(integratedTable);
     }
 
     async function switchTheme() {
