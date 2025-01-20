@@ -21,7 +21,7 @@
         }
     
         input[type="text"],
-        select,
+        input[name="client"],
         button {
             font-family: monospace;
             font-size: 16px;
@@ -33,9 +33,12 @@
             color: #e0e0e0;
             outline: none;
         }
+        input[name="client"]{
+            width: 235px;
+        }
     
         input[type="text"]:focus,
-        select:focus,
+        input[name="client"]:focus,
         button:focus {
             border-color: #1e88e5;
             box-shadow: 0 0 5px rgba(30, 136, 229, 0.5);
@@ -53,17 +56,13 @@
             background-color: #1565c0;
         }
    
-        input[type="radio"] {
+        input[group="data"] {
             appearance: none; 
-            border-radius: 50%;
-            height: 10px;
-            width: 10px;
-            margin-left: 10px;
             position:absolute;
             opacity: 0;
         }
 
-        input[type="radio"]:checked + label {
+        input[group="data"]:checked + label {
             margin-left: 0px;
             margin-right: -8px;
             padding: 7px; 
@@ -73,7 +72,7 @@
         }
         label {
             cursor: pointer;
-            margin-left: 10px;
+            margin-left: 9px;
         }
         #viewmode-container{
             border: 2px solid #7a7a7a96;
@@ -110,7 +109,7 @@
         @media (max-width: 600px) {
     
             input[type="text"],
-            select,
+            input[name="client"],
             button {
                 width: calc(100% - 40px);
                 margin: 10px 20px;
@@ -193,83 +192,31 @@
             cursor: pointer;
         }
     
-        #theme {
-            float: right;
-            padding: 15px;
-            filter: invert(100%);
-        }
-    
-    
-        .switch {
-            position: relative;
-            float: right;
-            margin: 7px 0 0 0;
-            width: 50px;
-            height: 25px;
-            padding-right: 3px;
-        }
-    
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-    
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #000000;
-            transition: .4s;
-        }
-    
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: #ffffff;
-            transition: .4s;
-        }
-    
-        input:checked+.slider {
-            background-color: #ffffff;
-        }
-    
-        input:focus+.slider {
-            box-shadow: 0 0 1px #686868fb;
-        }
-    
-        input:checked+.slider:before {
-            transform: translateX(26px);
-            background-color: #686868fb;
-        }
-    
-        .slider.round {
-            border-radius: 34px;
-            border: solid 2px #686868fb;
-        }
-    
-        .slider.round:before {
-            height: 14px;
-            width: 14px;
-            border-radius: 50%;
-            background-color: rgb(255, 255, 255);
-        }
-    
         .material-symbols-outlined {
-            float: right;
-            color: #686868fb;
-            margin: 7px 0 0 0;
-        }
+            margin: 0 0 0 0;
+            padding: 2px;
+        } 
         #theme-toggler {
+            display: flex;
             float: right;
-            padding-top: 10px;
+            margin-top: 10px;
+            border: 2px solid #7a7a7a96;
+            border-radius: 4px;
+            padding: 2px 3px 2px 2px;
+            align-items: center;
+            justify-content: space-around;
+            width: 55px;
+
+        }
+        input[name="theme"]{
+            position: absolute;
+            appearance: none;
+        }
+        input[name="theme"]:checked + label {
+            border-radius: 2px;
+            background-color: #7a7a7a96;
+            padding: 2px 2px 2px 2px;
+            color: white;
         }
         #headerContainer {
             padding: 10px;
@@ -300,6 +247,15 @@
         ::-webkit-scrollbar-thumb:hover {
             background-color: #555;
         }
+
+        input::-webkit-calendar-picker-indicator {
+            display: none !important;
+        }
+
+        input::-webkit-inner-spin-button {
+            display: none !important;
+        }
+
     </style>
 </head>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
@@ -309,38 +265,42 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 <body id = "body">
     <div id="headerContainer">
-    <input type="text" id="docId" placeholder="Enter docId">
-    <select name="list" id="clients">
-        <option value="--select client--">--select client--</option>        <option value="accGen/385386">accGen/385386</option>        <option value="acmic/176516">acmic/176516</option>        <option value="acmic/721722">acmic/721722</option>        <option value="alinsco/176695">alinsco/176695</option>        <option value="allUnited/176438">allUnited/176438</option>        <option value="amerCom/423424">amerCom/423424</option>        <option value="amerCom/423437">amerCom/423437</option>        <option value="amerCom/423438">amerCom/423438</option>        <option value="amerCom/423474">amerCom/423474</option>        <option value="amFam/176402">amFam/176402</option>        <option value="amica/719720">amica/719720</option>        <option value="amWins/528529">amWins/528529</option>        <option value="assAmer/717718">assAmer/717718</option>        <option value="assRisk/507508">assRisk/507508</option>        <option value="atlasFin/176458">atlasFin/176458</option>        <option value="atlasFin/511512">atlasFin/511512</option>        <option value="autoClubEnt/176596">autoClubEnt/176596</option>        <option value="autoClubGrp/176433">autoClubGrp/176433</option>        <option value="autoone/289299">autoone/289299</option>        <option value="berkMed/509510">berkMed/509510</option>        <option value="bluefire/176507">bluefire/176507</option>        <option value="canal/502503">canal/502503</option>        <option value="cendant/319504">cendant/319504</option>        <option value="cig/176709">cig/176709</option>        <option value="columbia/176461">columbia/176461</option>        <option value="commIns/176400">commIns/176400</option>        <option value="commIns/408409">commIns/408409</option>        <option value="commWest/449455">commWest/449455</option>        <option value="contentQa/167339">contentQa/167339</option>        <option value="csaa/176620">csaa/176620</option>        <option value="csaa/565566">csaa/565566</option>        <option value="demo/524525">demo/524525</option>        <option value="democompany-pcg/167274">democompany-pcg/167274</option>        <option value="divAuto/176177">divAuto/176177</option>        <option value="encova/176455">encova/176455</option>        <option value="esis/335336">esis/335336</option>        <option value="esis/335339">esis/335339</option>        <option value="esis/335342">esis/335342</option>        <option value="farmersIns/176493">farmersIns/176493</option>        <option value="farmersrulestest/167282">farmersrulestest/167282</option>        <option value="fbfs/519520">fbfs/519520</option>        <option value="fbfspc/176730">fbfspc/176730</option>        <option value="fredLoya/176496">fredLoya/176496</option>        <option value="fredLoya/530531">fredLoya/530531</option>        <option value="fws/176725">fws/176725</option>        <option value="geico/12">geico/12</option>        <option value="geico/13">geico/13</option>        <option value="geico/14">geico/14</option>        <option value="geico/176453">geico/176453</option>        <option value="gmac/4344">gmac/4344</option>        <option value="greatamerican/3435">greatamerican/3435</option>        <option value="greatWestCasualty/176520">greatWestCasualty/176520</option>        <option value="greenStreet/585586">greenStreet/585586</option>        <option value="hanover/176431">hanover/176431</option>        <option value="harleysville/167239">harleysville/167239</option>        <option value="hartforddpr/141142">hartforddpr/141142</option>        <option value="horMann/176553">horMann/176553</option>        <option value="horMann/521522">horMann/521522</option>        <option value="idahofarmbureau/394395">idahofarmbureau/394395</option>        <option value="IESTEST3/167249">IESTEST3/167249</option>        <option value="indianafarmbureaust/167297">indianafarmbureaust/167297</option>        <option value="infinity/176384">infinity/176384</option>        <option value="infinity/498499">infinity/498499</option>        <option value="kemper/176184">kemper/176184</option>        <option value="kemper/498499">kemper/498499</option>        <option value="kemper/498569">kemper/498569</option>        <option value="kentuckyNat/176449">kentuckyNat/176449</option>        <option value="kentuckyNat/513514">kentuckyNat/513514</option>        <option value="LegacyEng/167299">LegacyEng/167299</option>        <option value="libertyMutPers/176338">libertyMutPers/176338</option>        <option value="libertyMutual/176746">libertyMutual/176746</option>        <option value="libertyMutualPilot/176519">libertyMutualPilot/176519</option>        <option value="mapfre/176314">mapfre/176314</option>        <option value="mapfre/176604">mapfre/176604</option>        <option value="mapfre/176604">mapfre/176604</option>        <option value="mapfre/420421">mapfre/420421</option>        <option value="mapfre/443444">mapfre/443444</option>        <option value="maxumSpec/176664">maxumSpec/176664</option>        <option value="meemic/176678">meemic/176678</option>        <option value="mendota/176728">mendota/176728</option>        <option value="metlife/176462">metlife/176462</option>        <option value="mobilitas/176714">mobilitas/176714</option>        <option value="mobilitas/536537">mobilitas/536537</option>        <option value="mutOfEnumclaw/176420">mutOfEnumclaw/176420</option>        <option value="mutOfEnumclaw/500501">mutOfEnumclaw/500501</option>        <option value="nationwide/176370">nationwide/176370</option>        <option value="nationwide/176506">nationwide/176506</option>        <option value="nationwide/180181">nationwide/180181</option>        <option value="nationwide/180182">nationwide/180182</option>        <option value="nationwide/180183">nationwide/180183</option>        <option value="nationwide/180184">nationwide/180184</option>        <option value="navMgmt/176691">navMgmt/176691</option>        <option value="NewRulesEng/167298">NewRulesEng/167298</option>        <option value="nfu/1718">nfu/1718</option>        <option value="noblr/176514">noblr/176514</option>        <option value="noblr/928929">noblr/928929</option>        <option value="ohioMut/176222">ohioMut/176222</option>        <option value="preferredMutual/176735">preferredMutual/176735</option>        <option value="preferredMutual/579580">preferredMutual/579580</option>        <option value="pronto/176682">pronto/176682</option>        <option value="QAIES3/167300">QAIES3/167300</option>        <option value="quincy/176727">quincy/176727</option>        <option value="RapidBillReview/567568">RapidBillReview/567568</option>        <option value="root/176680">root/176680</option>        <option value="root/572573">root/572573</option>        <option value="rulesenginetest/167281">rulesenginetest/167281</option>        <option value="safeco/6768">safeco/6768</option>        <option value="safeco/6769">safeco/6769</option>        <option value="safeco/6770">safeco/6770</option>        <option value="safeco/6771">safeco/6771</option>        <option value="safeco/6772">safeco/6772</option>        <option value="safeco/6773">safeco/6773</option>        <option value="safeco/6775">safeco/6775</option>        <option value="safeco/6776">safeco/6776</option>        <option value="sandbox/964965">sandbox/964965</option>        <option value="sbi/176723">sbi/176723</option>        <option value="scottsdale/176345">scottsdale/176345</option>        <option value="scottsdale/450451">scottsdale/450451</option>        <option value="scottsdale/450497">scottsdale/450497</option>        <option value="sedgwick/352471">sedgwick/352471</option>        <option value="sentry/61359">sentry/61359</option>        <option value="shelter/176463">shelter/176463</option>        <option value="shelter/526527">shelter/526527</option>        <option value="shelter/526607">shelter/526607</option>        <option value="southernGeneral/176749">southernGeneral/176749</option>        <option value="stateAuto/176459">stateAuto/176459</option>        <option value="stateAuto/534535">stateAuto/534535</option>        <option value="TestClient/123456">TestClient/123456</option>        <option value="theHartford/176189">theHartford/176189</option>        <option value="tnfb/176309">tnfb/176309</option>        <option value="tnfb/176668">tnfb/176668</option>        <option value="toggle/176742">toggle/176742</option>        <option value="togglest-qa/167296">togglest-qa/167296</option>        <option value="tower/401402">tower/401402</option>        <option value="travelers/154217">travelers/154217</option>        <option value="travelers/176559">travelers/176559</option>        <option value="travelersrulestest/167283">travelersrulestest/167283</option>        <option value="universalunderwriters/404405">universalunderwriters/404405</option>        <option value="uploadsection/167210">uploadsection/167210</option>        <option value="usaa/133136">usaa/133136</option>        <option value="usaa/175176">usaa/175176</option>        <option value="usaa/175177">usaa/175177</option>        <option value="usaa/176308">usaa/176308</option>        <option value="usaa/176308">usaa/176308</option>        <option value="uticaAuto/176732">uticaAuto/176732</option>        <option value="uticaGeneral/176731">uticaGeneral/176731</option>        <option value="vermontmutual/427428">vermontmutual/427428</option>        <option value="wdbTest/293294">wdbTest/293294</option>        <option value="wdbTest/293294">wdbTest/293294</option>        <option value="wdbTest/293456">wdbTest/293456</option>        <option value="windhaven/505506">windhaven/505506</option>        <option value="zurichamerican/237238">zurichamerican/237238</option>
-    </select>
-    <input type="text" id="tokenInput" placeholder="Enter Auth Token">
-    <button onclick="(async function(){ const result = await fetchJSON(); if (result) await format(); else alert('Failed to fetch ' + document.querySelector('input[name=\'dataToView\']:checked').value); })();">Fetch</button>
-    <span id="viewmode-container">
-        <input id = "jsonView" type="radio" name="viewMode" value="text" onclick="format()" checked> 
-        <label for="jsonView">JSON</label>
-        <input id = "tableView" type="radio" name="viewMode" onclick="format()" value="table"> 
-        <label for="tableView">Table</label>
-    </span>
+        <input type="text" id="docId" placeholder="Enter docId">
+        <span class="input-wrapper">
+        <input list="client-list" id="clients" name="client" placeholder="Enter or select client">
+        <datalist name="list" id="client-list">
+           <option value="accGen/385386">accGen/385386</option>        <option value="acmic/176516">acmic/176516</option>        <option value="acmic/721722">acmic/721722</option>        <option value="alinsco/176695">alinsco/176695</option>        <option value="allUnited/176438">allUnited/176438</option>        <option value="amerCom/423424">amerCom/423424</option>        <option value="amerCom/423437">amerCom/423437</option>        <option value="amerCom/423438">amerCom/423438</option>        <option value="amerCom/423474">amerCom/423474</option>        <option value="amFam/176402">amFam/176402</option>        <option value="amica/719720">amica/719720</option>        <option value="amWins/528529">amWins/528529</option>        <option value="assAmer/717718">assAmer/717718</option>        <option value="assRisk/507508">assRisk/507508</option>        <option value="atlasFin/176458">atlasFin/176458</option>        <option value="atlasFin/511512">atlasFin/511512</option>        <option value="autoClubEnt/176596">autoClubEnt/176596</option>        <option value="autoClubGrp/176433">autoClubGrp/176433</option>        <option value="autoone/289299">autoone/289299</option>        <option value="berkMed/509510">berkMed/509510</option>        <option value="bluefire/176507">bluefire/176507</option>        <option value="canal/502503">canal/502503</option>        <option value="cendant/319504">cendant/319504</option>        <option value="cig/176709">cig/176709</option>        <option value="columbia/176461">columbia/176461</option>        <option value="commIns/176400">commIns/176400</option>        <option value="commIns/408409">commIns/408409</option>        <option value="commWest/449455">commWest/449455</option>        <option value="contentQa/167339">contentQa/167339</option>        <option value="csaa/176620">csaa/176620</option>        <option value="csaa/565566">csaa/565566</option>        <option value="demo/524525">demo/524525</option>        <option value="democompany-pcg/167274">democompany-pcg/167274</option>        <option value="divAuto/176177">divAuto/176177</option>        <option value="encova/176455">encova/176455</option>        <option value="esis/335336">esis/335336</option>        <option value="esis/335339">esis/335339</option>        <option value="esis/335342">esis/335342</option>        <option value="farmersIns/176493">farmersIns/176493</option>        <option value="farmersrulestest/167282">farmersrulestest/167282</option>        <option value="fbfs/519520">fbfs/519520</option>        <option value="fbfspc/176730">fbfspc/176730</option>        <option value="fredLoya/176496">fredLoya/176496</option>        <option value="fredLoya/530531">fredLoya/530531</option>        <option value="fws/176725">fws/176725</option>        <option value="geico/12">geico/12</option>        <option value="geico/13">geico/13</option>        <option value="geico/14">geico/14</option>        <option value="geico/176453">geico/176453</option>        <option value="gmac/4344">gmac/4344</option>        <option value="greatamerican/3435">greatamerican/3435</option>        <option value="greatWestCasualty/176520">greatWestCasualty/176520</option>        <option value="greenStreet/585586">greenStreet/585586</option>        <option value="hanover/176431">hanover/176431</option>        <option value="harleysville/167239">harleysville/167239</option>        <option value="hartforddpr/141142">hartforddpr/141142</option>        <option value="horMann/176553">horMann/176553</option>        <option value="horMann/521522">horMann/521522</option>        <option value="idahofarmbureau/394395">idahofarmbureau/394395</option>        <option value="IESTEST3/167249">IESTEST3/167249</option>        <option value="indianafarmbureaust/167297">indianafarmbureaust/167297</option>        <option value="infinity/176384">infinity/176384</option>        <option value="infinity/498499">infinity/498499</option>        <option value="kemper/176184">kemper/176184</option>        <option value="kemper/498499">kemper/498499</option>        <option value="kemper/498569">kemper/498569</option>        <option value="kentuckyNat/176449">kentuckyNat/176449</option>        <option value="kentuckyNat/513514">kentuckyNat/513514</option>        <option value="LegacyEng/167299">LegacyEng/167299</option>        <option value="libertyMutPers/176338">libertyMutPers/176338</option>        <option value="libertyMutual/176746">libertyMutual/176746</option>        <option value="libertyMutualPilot/176519">libertyMutualPilot/176519</option>        <option value="mapfre/176314">mapfre/176314</option>        <option value="mapfre/176604">mapfre/176604</option>        <option value="mapfre/176604">mapfre/176604</option>        <option value="mapfre/420421">mapfre/420421</option>        <option value="mapfre/443444">mapfre/443444</option>        <option value="maxumSpec/176664">maxumSpec/176664</option>        <option value="meemic/176678">meemic/176678</option>        <option value="mendota/176728">mendota/176728</option>        <option value="metlife/176462">metlife/176462</option>        <option value="mobilitas/176714">mobilitas/176714</option>        <option value="mobilitas/536537">mobilitas/536537</option>        <option value="mutOfEnumclaw/176420">mutOfEnumclaw/176420</option>        <option value="mutOfEnumclaw/500501">mutOfEnumclaw/500501</option>        <option value="nationwide/176370">nationwide/176370</option>        <option value="nationwide/176506">nationwide/176506</option>        <option value="nationwide/180181">nationwide/180181</option>        <option value="nationwide/180182">nationwide/180182</option>        <option value="nationwide/180183">nationwide/180183</option>        <option value="nationwide/180184">nationwide/180184</option>        <option value="navMgmt/176691">navMgmt/176691</option>        <option value="ncfb/176542">ncfb/176542</option>        <option value="NewRulesEng/167298">NewRulesEng/167298</option>        <option value="nfu/1718">nfu/1718</option>        <option value="noblr/176514">noblr/176514</option>        <option value="noblr/928929">noblr/928929</option>        <option value="ohioMut/176222">ohioMut/176222</option>        <option value="preferredMutual/176735">preferredMutual/176735</option>        <option value="preferredMutual/579580">preferredMutual/579580</option>        <option value="pronto/176682">pronto/176682</option>        <option value="QAIES3/167300">QAIES3/167300</option>        <option value="quincy/176727">quincy/176727</option>        <option value="RapidBillReview/567568">RapidBillReview/567568</option>        <option value="root/176680">root/176680</option>        <option value="root/572573">root/572573</option>        <option value="rulesenginetest/167281">rulesenginetest/167281</option>        <option value="safeco/6768">safeco/6768</option>        <option value="safeco/6769">safeco/6769</option>        <option value="safeco/6770">safeco/6770</option>        <option value="safeco/6771">safeco/6771</option>        <option value="safeco/6772">safeco/6772</option>        <option value="safeco/6773">safeco/6773</option>        <option value="safeco/6775">safeco/6775</option>        <option value="safeco/6776">safeco/6776</option>        <option value="sandbox/964965">sandbox/964965</option>        <option value="sbi/176723">sbi/176723</option>        <option value="scottsdale/176345">scottsdale/176345</option>        <option value="scottsdale/450451">scottsdale/450451</option>        <option value="scottsdale/450497">scottsdale/450497</option>        <option value="sedgwick/352471">sedgwick/352471</option>        <option value="sentry/61359">sentry/61359</option>        <option value="shelter/176463">shelter/176463</option>        <option value="shelter/526527">shelter/526527</option>        <option value="shelter/526607">shelter/526607</option>        <option value="southernGeneral/176749">southernGeneral/176749</option>        <option value="stateAuto/176459">stateAuto/176459</option>        <option value="stateAuto/534535">stateAuto/534535</option>        <option value="TestClient/123456">TestClient/123456</option>        <option value="theHartford/176189">theHartford/176189</option>        <option value="tnfb/176309">tnfb/176309</option>        <option value="tnfb/176668">tnfb/176668</option>        <option value="toggle/176742">toggle/176742</option>        <option value="togglest-qa/167296">togglest-qa/167296</option>        <option value="tower/401402">tower/401402</option>        <option value="travelers/154217">travelers/154217</option>        <option value="travelers/176559">travelers/176559</option>        <option value="travelersrulestest/167283">travelersrulestest/167283</option>        <option value="universalunderwriters/404405">universalunderwriters/404405</option>        <option value="uploadsection/167210">uploadsection/167210</option>        <option value="usaa/133136">usaa/133136</option>        <option value="usaa/175176">usaa/175176</option>        <option value="usaa/175177">usaa/175177</option>        <option value="usaa/176308">usaa/176308</option>        <option value="usaa/176308">usaa/176308</option>        <option value="uticaAuto/176732">uticaAuto/176732</option>        <option value="uticaGeneral/176731">uticaGeneral/176731</option>        <option value="vermontmutual/427428">vermontmutual/427428</option>        <option value="wdbTest/293294">wdbTest/293294</option>        <option value="wdbTest/293294">wdbTest/293294</option>        <option value="wdbTest/293456">wdbTest/293456</option>        <option value="windhaven/505506">windhaven/505506</option>        <option value="zurichamerican/237238">zurichamerican/237238</option>
+        </datalist>
+        </span>
+        <input type="text" id="tokenInput" placeholder="Enter Auth Token">
+        <button
+            onclick="(async function(){ const result = await fetchJSON(); if (result) await format(); else alert('Failed to fetch ' + document.querySelector('input[name=\'dataToView\']:checked').value); })();">Fetch</button>
+        <span id="viewmode-container">
+            <input id="jsonView" type="radio" name="viewMode" group="data" value="text" onclick="format()" checked>
+            <label for="jsonView">JSON</label>
+            <input id="tableView" type="radio" name="viewMode" group="data" onclick="format()" value="table">
+            <label for="tableView">Table</label>
+        </span>
+    
+        <span id="dataToView-container">
+            <input id="responseRadio" type="radio" name="dataToView" group="data" onclick="format()" value="Response" checked>
+            <label for="responseRadio">Response</label>
+            <input id="requestRadio" type="radio" name="dataToView" group="data" onclick="format()" value="Request">
+            <label for="requestRadio">Request</label>
+            <input id="bundlerRadio" type="radio" name="dataToView" group="data" onclick="format()" value="Bundler">
+            <label for="bundlerRadio">Bundler</label>
+        </span>
 
-    <span id="dataToView-container">
-        <input id="responseRadio"type="radio" name="dataToView" onclick="format()" value="Response" checked> 
-        <label for="responseRadio">Response</label>
-        <input id="requestRadio" type="radio" name="dataToView" onclick="format()" value="Request">
-        <label for="requestRadio">Request</label>
-        <input id="bundlerRadio"type="radio" name="dataToView" onclick="format()" value="Bundler">
-        <label for="bundlerRadio">Bundler</label>
-    </span>
-    <button id="printExcel" onclick="printExcel()">Export to xl</button>
-    <button id="combine-data" onclick="integrateData()">Integrate</button>
-    <span id="theme-toggler">
-    <span class="material-symbols-outlined"> &ensp;light_mode </span>
-    <label class="switch" onclick="switchTheme()">
-        <input type="checkbox" id="checkBox">
-        <span class="slider round"></span>
-    </label>
-    <span class="material-symbols-outlined"> dark_mode&ensp; </span>
-</span>
-</div>
+        <button id="printExcel" onclick="printExcel()">Export to xl</button>
+        <button id="combine-data" onclick="integrateData()">Integrate</button>
+
+        <span id="theme-toggler">
+            <input id="darkRadio" type="radio" name="theme" onclick="switchTheme()" value="dark" checked>
+            <label for="darkRadio" class="material-symbols-outlined">dark_mode</label>
+            <input id="lightRadio" type="radio" name="theme" onclick="switchTheme()" value="light">
+            <label for="lightRadio" class="material-symbols-outlined">light_mode</label>
+        </span>        
+    </div>
     <pre id="dataContainer"></pre>
 <script defer>
     var jsonData = null;
@@ -359,15 +319,15 @@
         const token = document.getElementById('tokenInput').value;
 
         if (!doc) {
-            alert("Please enter a docId");
+            alert("Enter a DocId");
             return;
         }
-        if (client == "--select client--") {
-            alert("Please select a client");
+        if (client == '' || !(/^[a-zA-Z]+\/\d+$/.test(client))) {
+            alert("Select a Valid Client");
             return;
         }
         if(!token){
-            alert("Please enter a Auth Token");
+            alert("Enter Auth Token");
             return;
         }
 
@@ -549,7 +509,7 @@
         const modalContent = document.createElement("div");
         modalContent.classList.add("modal-content");
 
-        if(document.getElementById("checkBox").checked){
+        if(document.getElementById("lightRadio").checked){
             modalContent.style.backgroundColor = "white";
             modalContent.style.color = "black";
         }
@@ -631,7 +591,7 @@
             'requestId': response[0]['requestId'] || '', 
             'correlationId': response[0]['correlationId'] || '',
             'clientCode': response[0]['clientCode'] || '', 
-            'formType': response[0]['formType'].includes('cms') ? 'CMS-1500' : response[0]['formType'].includes('ub04') ? 'UB-04' : 'Non-Standard',
+            'formType': response[0]['formType'].includes('cms') ? 'CMS-1500' : response[0]['formType'].includes('ub04') ? 'UB-04' : response[0]['formType'].includes('nf3') ? 'NF-3' : 'Non-Standard',
             'treatmentState': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['treatmentState'] || '',
             'treatmentZip': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['treatmentZip'] || '',
             'providerTitle': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['providerTitle'] || '',
@@ -644,6 +604,7 @@
             'RiskState': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['RiskState'] || '',
             'claimHandlingSystem': !request['request']? '' : request['request'][0]['supportingInformation']['claim']['claimHandlingSystem'] || '',
             'dateOfLoss': !request['request']? '' : request['request'][0]['supportingInformation']['claim']['dateOfLoss'] || '',
+            'policyCoverageType': !request['request']? '' : request['request'][0]['supportingInformation']['claim']['policyCoverageType'] || '',
             'medExposure': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['medExposure'] || '',
             'documentSource': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['documentSource'] || '',
             'abpStatus': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['abpStatus'] || '',
@@ -667,7 +628,7 @@
         integratedTable.appendChild(docInfoValueRow);
 
         
-        const headers = ['lineNo', 'serviceDate', 'cptHcpcs', 'revenueCode', 'modifier1', 'modifier2', 'modifier3', 'modifier4', 'serviceUnits', 'totalCharges', 'appliedFlag','fireFlagRule', 'firedReimburseRule', 'firedDenyRule', 'firedBundlerRules', 'bundlerRuleName', 'lineReimburse', 'lineRuleName', 'finalRc', 'finalReimburse'];
+        const headers = ['lineNo', 'serviceDate', 'cptHcpcs', 'revenueCode', 'modifier1', 'modifier2', 'modifier3', 'modifier4', 'serviceUnits', 'totalCharges', 'displayLineNo', 'appliedFlag','fireFlagRule', 'firedReimburseRule', 'firedDenyRule', 'firedBundlerRules', 'bundlerRuleName', 'lineReimburse', 'lineRuleName', 'finalRc', 'finalReimburse'];
         
         const headerRow = document.createElement('tr');
 
@@ -734,6 +695,7 @@
                 row.appendChild(createCell(!line ? '' : line['charges']));
             }
 
+            row.appendChild(createCell(recs['displayLineNo']));
             row.appendChild(createCell(recs['appliedFlag']));
             row.appendChild(createCell(recs['fireFlagRule']));
             row.appendChild(createCell(recs['firedReimburseRule']));
@@ -756,12 +718,12 @@
     }
 
     async function switchTheme() {
-            const checkbox = document.getElementById("checkBox");
+            const checkbox = document.getElementById("lightRadio");
                 if (checkbox.checked) {
                     document.getElementById("body").style.backgroundColor = "white";
                     document.querySelectorAll('label').forEach(function (element) { element.style.color = "black"; });
-                    document.querySelectorAll('input[type="text"], select').forEach(function (element) { element.style.color = "black"; });
-                    document.querySelectorAll('input[type="text"], select').forEach(function (element) { element.style.backgroundColor = "white"; });
+                    document.querySelectorAll('input[type="text"], input[name="client"]').forEach(function (element) { element.style.color = "black"; });
+                    document.querySelectorAll('input[type="text"], input[name="client"]').forEach(function (element) { element.style.backgroundColor = "white"; });
                     document.getElementById("dataContainer").style.color = "black";
                     document.getElementById("dataContainer").style.backgroundColor = "white";
                     document.querySelectorAll('.hljs-attr').forEach(function (element) { element.style.color = "#3240ff"; });
@@ -775,8 +737,8 @@
                     document.getElementById("dataContainer").style.backgroundColor = "#1e1e1e";
                     document.getElementById("dataContainer").style.color = "white";
                     document.querySelectorAll('label').forEach(function (element) { element.style.color = "white"; });
-                    document.querySelectorAll('input[type="text"], select').forEach(function (element) { element.style.color = "white"; });
-                    document.querySelectorAll('input[type="text"], select').forEach(function (element) { element.style.backgroundColor = "#1e1e1e"; });
+                    document.querySelectorAll('input[type="text"], input[name="client"]').forEach(function (element) { element.style.color = "white"; });
+                    document.querySelectorAll('input[type="text"], input[name="client"]').forEach(function (element) { element.style.backgroundColor = "#1e1e1e"; });
                     document.querySelectorAll('.hljs-attr').forEach(function (element) { element.style.color = "#51b7ee"; });
                     document.querySelectorAll('.hljs-string').forEach(function (element) { element.style.color = "#CE9178"; });
                     document.querySelectorAll('.hljs-number').forEach(function (element) { element.style.color = "#16b887"; });
