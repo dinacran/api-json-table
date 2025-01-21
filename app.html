@@ -316,20 +316,20 @@
         responseMap.clear();
         const doc = document.getElementById('docId').value;
         var client = document.getElementById('clients').value;
-        const token = document.getElementById('tokenInput').value;
+        const token = await getToken();
 
         if (!doc) {
             alert("Enter a DocId");
             throw new Error('doc is null');
         }
         (client == 'auto find') ? client = await findClient(doc, token) : null;
+        
         if (client == '' || !(/^[a-zA-Z]+\/\d+$/.test(client)) || client == null) {
             alert("Select a Valid Client");
             throw new Error('client is null');
         }
         if(!token){
-            alert("Enter Auth Token");
-            throw new Error('token is null');
+            token = prompt("Enter auth token..");
         }
 
         const responseUri = "https://rbr-qa.nonprod.aws.casualty.cccis.com/service-gateway/api/requests/" + client + "/" + doc
@@ -372,7 +372,8 @@
                 throw new Error("Couldn't find any client");
             }
             document.getElementById('clients').value = client;
-            const responseUri = "http://127.0.0.1:5000/response/"+client;
+            const responseUri = "https://rbr-qa.nonprod.aws.casualty.cccis.com/service-gateway/api/requests/" + client + "/" + doc
+            + "/withRecs";
             try{
             const response = await fetch(responseUri, {
                 method: 'GET',
@@ -395,6 +396,37 @@
             return;
         }
     }
+    }
+
+    async function getToken(){
+        const tokenStr = localStorage.getItem('token');
+
+        if(!tokenStr){
+            return await setToken();
+        }
+
+        const token = JSON.parse(tokenStr);
+        const now = new Date();
+
+        if (now.getTime() > token.expiry){
+            return await setToken();
+        }
+
+        return token.value;
+    }
+
+    async function setToken(){
+        const newToken = await generateToken();
+
+        const tokenCache = {
+            value: newToken,
+            expiry: now.getTime() + (8 * 60 * 60 * 1000)
+        } 
+
+        localStorage.setItem('token', JSON.stringify(tokenCache));
+
+        return newToken;
+
     }
 
     async function format() {
@@ -750,6 +782,58 @@
         dataContainer.innerHTML = '';
 
         dataContainer.appendChild(integratedTable);
+    }
+
+    async function generateToken(){
+        const ClientId = 'iXB9clPjAAsz-lf_2rSlWu-V_iQiYl7RfIBD4ViN'; 
+        const ClientSecret = '0oatvfb8y7Wqy8ENj0h7';
+        const OktaUrl = 'https://qaauth.cccis.com/oauth2/austvf6cmyI6IZFHM0h7/v1/token';
+
+        if (!ClientId || !ClientSecret || !OktaUrl) {
+            throw new Error("Must pass in `ClientId` and `OktaUrl` and set `process.env.client_secret`");
+        }
+
+        console.log(`Creds: ${ClientId}:${ClientSecret}`);
+
+        const clientCreds = Buffer.from(`${ClientId}:${ClientSecret}`).toString("base64");
+
+        const oktaHeader = {
+            Authorization: `Basic ${clientCreds}`,
+            Accept: "application/json",
+        };
+
+        let body = "grant_type=client_credentials&scope=get:item%20access:token";
+        if (!ReadOnlyScopes) {
+            body += "%20save:item";
+        }
+
+        const https = require("https");
+        https.globalAgent.options.secureProtocol = "TLSv1_2_method";
+
+         try {
+            const response = await fetch(OktaUrl, {
+            method: "POST",
+            headers: {
+                ...oktaHeader,
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body,
+        });
+
+        if (!response.ok) {
+            console.warn("Couldn't get JWT");
+            console.log(`Status: ${response.status}`);
+            console.log(`Body: ${await response.text()}`);
+            return prompt('Failed to generate token! Please enter manually...');
+        }
+
+        const data = await response.json();
+        const jwt = data.access_token;
+        console.log("JWT:", jwt);
+        return jwt;
+        } catch (error) {
+            return prompt('Failed to generate token! Please enter manually...');
+        }
     }
 
     async function switchTheme() {
