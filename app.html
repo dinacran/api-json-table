@@ -372,8 +372,7 @@
                 throw new Error("Couldn't find any client");
             }
             document.getElementById('clients').value = client;
-            const responseUri = "https://rbr-qa.nonprod.aws.casualty.cccis.com/service-gateway/api/requests/" + client + "/" + doc
-            + "/withRecs";
+            const responseUri = "https://rbr-qa.nonprod.aws.casualty.cccis.com/service-gateway/api/requests/" + client + "/" + doc + "/withRecs";
             try{
             const response = await fetch(responseUri, {
                 method: 'GET',
