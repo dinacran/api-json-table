@@ -316,7 +316,6 @@
         responseMap.clear();
         const doc = document.getElementById('docId').value;
         var client = document.getElementById('clients').value;
-        const token = await getToken();
 
         if (!doc) {
             alert("Enter a DocId");
@@ -328,9 +327,9 @@
             alert("Select a Valid Client");
             throw new Error('client is null');
         }
-        if(!token){
-            token = prompt("Enter auth token..");
-        }
+        var token = await getToken() || prompt("Enter auth token..");
+        token = 1;
+
 
         const responseUri = "https://rbr-qa.nonprod.aws.casualty.cccis.com/service-gateway/api/requests/" + client + "/" + doc
                 + "/withRecs";
@@ -344,9 +343,9 @@
                             + "&category=bundlerRecommendation";
         
         const uriMap = {
-            'Response': responseUri,
-            'Request': requestUri,
-            'Bundler': bundlerUri
+            'Response': 'http://127.0.0.1:5000/response/' + client + '/' + token,
+            'Request': 'http://127.0.0.1:5000/request/'  + token,
+            'Bundler': 'http://127.0.0.1:5000/bundler/' + token
         };
         for (const uri in uriMap) {
                 await fetch(uriMap[uri], {
@@ -400,25 +399,30 @@
     async function getToken(){
         const tokenStr = localStorage.getItem('token');
 
-        if(!tokenStr){
+        console.log('from cache: ' + tokenStr);
+        const token = JSON.parse(tokenStr);
+
+        if(!token || !token.value || !token.expiry){
             return await setToken();
         }
+        console.log(token.value.iv);
 
-        const token = JSON.parse(tokenStr);
         const now = new Date();
 
         if (now.getTime() > token.expiry){
             return await setToken();
         }
 
-        return token.value;
+        return decryptValue(token.value, new Uint8Array(("191,94,250,0,129,17,228,75,140,249,89,27,183,212,228,84").split(',').map(Number)));
     }
 
     async function setToken(){
         const newToken = await generateToken();
+        console.log('new token: ' + newToken);
+        const now = new Date();
 
         const tokenCache = {
-            value: newToken,
+            value: (await encryptValue(newToken, new Uint8Array(("191,94,250,0,129,17,228,75,140,249,89,27,183,212,228,84").split(',').map(Number)))),
             expiry: now.getTime() + (8 * 60 * 60 * 1000)
         } 
 
@@ -426,6 +430,29 @@
 
         return newToken;
 
+    }
+    async function encryptValue(value, key) {
+        const encoder = new TextEncoder();
+        const iv = crypto.getRandomValues(new Uint8Array(16)); 
+        const cryptoKey = await crypto.subtle.importKey("raw", key, "AES-CBC",false, ["encrypt", "decrypt"]);
+
+        const encrypted = await crypto.subtle.encrypt({ name: "AES-CBC", iv }, cryptoKey, encoder.encode(value));
+
+        return {
+            iv: Array.from(iv),
+            encryptedData: Array.from(new Uint8Array(encrypted)),
+        };
+    }
+
+    async function decryptValue(encryptedObject, key) {
+        const { iv, encryptedData } = encryptedObject;
+        console.log(iv);
+        console.log(encryptedData);
+        const cryptoKey = await crypto.subtle.importKey("raw", key, "AES-CBC", false, ["encrypt", "decrypt"]);
+
+        const decrypted = await crypto.subtle.decrypt({ name: "AES-CBC", iv: new Uint8Array(iv) }, cryptoKey, new Uint8Array(encryptedData));
+
+        return new TextDecoder().decode(decrypted);
     }
 
     async function format() {
@@ -783,7 +810,11 @@
         dataContainer.appendChild(integratedTable);
     }
 
-    async function generateToken(){
+    async function generateToken() {
+
+        return new Promise(resolve => setTimeout(() => resolve('eyJraWQiOiJIMDBVYkdxQ3YyMHdHNzR0Nlp0bHlzRVpmUXYtRjltT3F3RHlQN25sMENNIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULjJvb3JKbEpRZG1nWHNQeDVxclpOWlFqMXJBZlBkV1NHUnF6b0E0a1Z2SVEiLCJpc3MiOiJodHRwczovL3FhYXV0aC5jY2Npcy5jb20vb2F1dGgyL2F1c3R2ZjZjbXlJNklaRkhNMGg3IiwiYXVkIjoiYXBpOi8vY2NjaXMvcmVsaWFuY2UvYXBpIiwiaWF0IjoxNzM0NTIzODE5LCJleHAiOjE3MzQ1NTI2MTksImNpZCI6IjBvYXR2ZmI4eTdXcXk4RU5qMGg3Iiwic2NwIjpbImFjY2Vzczp0b2tlbiIsInNhdmU6aXRlbSIsImdldDppdGVtIl0sInN1YiI6IjBvYXR2ZmI4eTdXcXk4RU5qMGg3IiwiYXBwTmFtZSI6IkNJQ0QtQ0FTUmVsaWFuY2UtTG9hZFRlc3QtREVWIn0.oX49EBEb3fRV9gHstUfXe-FJ-M9cOE2Za_7prMGT4gm16on58MuixG1WZXkbpG7oQif_M46dxuXxyK7CD0Rjg8iPC5qLP-WfrzRnEAH74m7aBzVSz2iPcDc71buYYTlaOBfHGYBqupXfzLyoHMlWLlLvOQxG1iNJTVJEymSrtH51_Zxt91tVBj84J98GIDzftlCSo1j-KGxOglT4wmdmdwx9LHbJ91cYJT5JGWenlfUzXyT9AIgAR6WU9RXScLZ2DF9U9V2iKbR44vo3bFeM3mY8HxrBnK22tytipfLkLdkvMWd5BEz7clJb3-fPVDVuUUp-YyfXCoHBUYCPhUrO7w'), 2000));
+    }
+    async function generateToken1(){
         const ClientId = 'iXB9clPjAAsz-lf_2rSlWu-V_iQiYl7RfIBD4ViN'; 
         const ClientSecret = '0oatvfb8y7Wqy8ENj0h7';
         const OktaUrl = 'https://qaauth.cccis.com/oauth2/austvf6cmyI6IZFHM0h7/v1/token';
