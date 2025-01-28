@@ -62,10 +62,12 @@
             opacity: 0;
         }
 
-        input[group="data"]:checked + label {
-            margin-left: 0px;
-            margin-right: -8px;
+        input[group="data"] + label{
             padding: 7px; 
+            background-color: #00000000;
+        }
+
+        input[group="data"]:checked + label {
             border-radius: 2px;
             background-color: #7a7a7a96;
             color: white;
@@ -76,27 +78,15 @@
         label[for="requestRadio"],
         label[for="bundlerRadio"]{
             cursor: pointer;
-            margin-left: 9px;
         }
-        #viewmode-container{
+        #viewmode-container, #dataToView-container{
+            display: inline-flex;
+            margin-left: 5px;
+            margin-right: 5px;
             border: 2px solid #7a7a7a96;
             border-radius: 4px;
-            padding-top: 9px;
-            padding-bottom: 9px;
-            padding-left: 2px;
-            padding-right: 2px;
-        }
-        #dataToView-container{
-            margin-left: 10px;
-            margin-right: 10px;
-            border: 2px solid #7a7a7a96;
-            border-radius: 4px;
-            padding-top: 9px;
-            padding-bottom: 9px;
-            padding-left: 2px;
-            padding-right: 2px;
-        }
-        
+            padding: 2px;            
+        }        
     
         #dataContainer:not(:empty) {
             margin: 10px 10px;
@@ -171,38 +161,41 @@
         }
     
         .modal-content {
-    
             background-color: #1e1e1e;
             margin: 10% auto;
-            padding: 20px;
             border: 1px solid #858585;
             overflow: scroll;
             max-width: min-content;
             border-radius: 4px;
 
         }
+        .nested-table{
+            margin: 10px;
+        }
     
         .close {
+            margin-right: 15px;
             color: #aaa;
             float: right;
-            font-size: 28px;
+            font-size: 20px;
             font-weight: bold;
         }
     
-        .close:hover,
-        .close:focus {
-            color: rgb(75, 75, 75);
-            text-decoration: none;
+        .close:hover{
             cursor: pointer;
+            text-shadow: 0px 0px 10px currentColor;
         }
-    
+
         #theme-toggler {
+            display: inline-flex;
+            gap: 2px;
+            padding: 2px;
             float: right;
             margin-top: 10px;
             border: 2px solid #7a7a7a96;
             border-radius: 4px;
-            padding: 2px 2px 2px 2px;
         }
+
         input[name="theme"]{
             position: absolute;
             appearance: none;
@@ -210,26 +203,23 @@
 
         img{
             display: inline-block;
-            vertical-align: sub;
+            vertical-align: middle;
             background-color: none;
             padding: 2px;
         }
+
         input[name="theme"]:checked + label img {
             background-color: #7a7a7a96;
             border-radius: 2px;
-            padding: 2px;
-
         }
         #headerContainer {
             padding: 10px;
         }
 
-    
         ::-webkit-scrollbar {
             width: 10px;
             height: 10px;
         }
-    
     
         ::-webkit-scrollbar-thumb {
             background-color: #888;
@@ -322,13 +312,14 @@
             alert("Enter a DocId");
             throw new Error('doc is null');
         }
+        var token = await getToken() || prompt("Enter auth token..");
+
         (client == 'auto find') ? client = await findClient(doc, token) : null;
         
         if (client == '' || !(/^[a-zA-Z]+\/\d+$/.test(client)) || client == null) {
             alert("Select a Valid Client");
             throw new Error('client is null');
         }
-        var token = await getToken() || prompt("Enter auth token..");
 
         const responseUri = "https://rbr-qa.nonprod.aws.casualty.cccis.com/service-gateway/api/requests/" + client + "/" + doc
                 + "/withRecs";
@@ -483,7 +474,7 @@
         var container = document.getElementById(containerId);
         const isArray = Array.isArray(data);
 
-        if(typeof data === 'string'){
+        if(typeof data === 'string' || typeof data === 'number') {
             const row = document.createElement("tr");
             const cell = document.createElement("td");
             cell.textContent = data;
@@ -585,6 +576,7 @@
     }
 
     function openModal(data) {
+        if(!data) return;
         const modal = createModal();
         document.body.appendChild(modal);
         generateTable(data, "nestedTable" + id);
@@ -605,7 +597,7 @@
 
         const closeButton = document.createElement("span");
         closeButton.classList.add("close");
-        closeButton.innerHTML = "&times;";
+        closeButton.innerHTML = "&#9932;";
         closeButton.onclick = function () {
             modal.style.display = "none";
             document.body.removeChild(modal);
@@ -615,6 +607,7 @@
 
         const nestedTable = document.createElement("div");
         nestedTable.id = "nestedTable" + ++id;
+        nestedTable.classList.add("nested-table");
 
         modalContent.appendChild(nestedTable);
 
@@ -819,7 +812,7 @@
             throw new Error("Must pass in `ClientId` and `OktaUrl` and set `process.env.client_secret`");
         }
 
-        const clientCreds = Buffer.from(`${ClientId}:${ClientSecret}`).toString("base64");
+        const clientCreds = btoa(`${ClientId}:${ClientSecret}`);
 
         const oktaHeader = {
             Authorization: `Basic ${clientCreds}`,
@@ -827,12 +820,8 @@
         };
 
         let body = "grant_type=client_credentials&scope=get:item%20access:token";
-        if (!ReadOnlyScopes) {
-            body += "%20save:item";
-        }
+        body += "%20save:item";
 
-        const https = require("https");
-        https.globalAgent.options.secureProtocol = "TLSv1_2_method";
 
          try {
             const response = await fetch(OktaUrl, {
