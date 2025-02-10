@@ -62,37 +62,31 @@
             opacity: 0;
         }
 
-        input[group="data"]:checked + label {
-            margin-left: 0px;
-            margin-right: -8px;
+        input[group="data"] + label{
             padding: 7px; 
+            background-color: #00000000;
+        }
+
+        input[group="data"]:checked + label {
             border-radius: 2px;
             background-color: #7a7a7a96;
             color: white;
         }
-        label {
+        label[for="jsonView"],
+        label[for="tableView"],
+        label[for="responseRadio"],
+        label[for="requestRadio"],
+        label[for="bundlerRadio"]{
             cursor: pointer;
-            margin-left: 9px;
         }
-        #viewmode-container{
+        #viewmode-container, #dataToView-container{
+            display: inline-flex;
+            margin-left: 5px;
+            margin-right: 5px;
             border: 2px solid #7a7a7a96;
             border-radius: 4px;
-            padding-top: 9px;
-            padding-bottom: 9px;
-            padding-left: 2px;
-            padding-right: 2px;
-        }
-        #dataToView-container{
-            margin-left: 10px;
-            margin-right: 10px;
-            border: 2px solid #7a7a7a96;
-            border-radius: 4px;
-            padding-top: 9px;
-            padding-bottom: 9px;
-            padding-left: 2px;
-            padding-right: 2px;
-        }
-        
+            padding: 2px;            
+        }        
     
         #dataContainer:not(:empty) {
             margin: 10px 10px;
@@ -167,67 +161,65 @@
         }
     
         .modal-content {
-    
             background-color: #1e1e1e;
             margin: 10% auto;
-            padding: 20px;
             border: 1px solid #858585;
             overflow: scroll;
             max-width: min-content;
             border-radius: 4px;
 
         }
+        .nested-table{
+            margin: 10px;
+        }
     
         .close {
+            margin-right: 15px;
             color: #aaa;
             float: right;
-            font-size: 28px;
+            font-size: 20px;
             font-weight: bold;
         }
     
-        .close:hover,
-        .close:focus {
-            color: rgb(75, 75, 75);
-            text-decoration: none;
+        .close:hover{
             cursor: pointer;
+            text-shadow: 0px 0px 10px currentColor;
         }
-    
-        .material-symbols-outlined {
-            margin: 0 0 0 0;
-            padding: 2px;
-        } 
+
         #theme-toggler {
-            display: flex;
+            display: inline-flex;
+            gap: 2px;
+            padding: 2px;
             float: right;
             margin-top: 10px;
             border: 2px solid #7a7a7a96;
             border-radius: 4px;
-            padding: 2px 3px 2px 2px;
-            align-items: center;
-            justify-content: space-around;
-            width: 55px;
-
         }
+
         input[name="theme"]{
             position: absolute;
             appearance: none;
         }
-        input[name="theme"]:checked + label {
-            border-radius: 2px;
+
+        img{
+            display: inline-block;
+            vertical-align: middle;
+            background-color: none;
+            padding: 2px;
+        }
+
+        input[name="theme"]:checked + label img {
             background-color: #7a7a7a96;
-            padding: 2px 2px 2px 2px;
-            color: white;
+            border-radius: 2px;
         }
         #headerContainer {
             padding: 10px;
         }
 
-    
         ::-webkit-scrollbar {
             width: 10px;
             height: 10px;
         }
-    
     
         ::-webkit-scrollbar-thumb {
             background-color: #888;
@@ -262,7 +254,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/json.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 <body id = "body">
     <div id="headerContainer">
         <input type="text" id="docId" placeholder="Enter docId">
@@ -296,40 +287,39 @@
 
         <span id="theme-toggler">
             <input id="darkRadio" type="radio" name="theme" onclick="switchTheme()" value="dark" checked>
-            <label for="darkRadio" class="material-symbols-outlined">dark_mode</label>
+            <label for="darkRadio" ><img src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjZThlYWVkIj48cGF0aCBkPSJNNDgwLTEyMHEtMTUwIDAtMjU1LTEwNVQxMjAtNDgwcTAtMTUwIDEwNS0yNTV0MjU1LTEwNXExNCAwIDI3LjUgMXQyNi41IDNxLTQxIDI5LTY1LjUgNzUuNVQ0NDQtNjYwcTAgOTAgNjMgMTUzdDE1MyA2M3E1NSAwIDEwMS0yNC41dDc1LTY1LjVxMiAxMyAzIDI2LjV0MSAyNy41cTAgMTUwLTEwNSAyNTVUNDgwLTEyMFptMC04MHE4OCAwIDE1OC00OC41VDc0MC0zNzVxLTIwIDUtNDAgOHQtNDAgM3EtMTIzIDAtMjA5LjUtODYuNVQzNjQtNjYwcTAtMjAgMy00MHQ4LTQwcS03OCAzMi0xMjYuNSAxMDJUMjAwLTQ4MHEwIDExNiA4MiAxOTh0MTk4IDgyWm0tMTAtMjcwWiIvPjwvc3ZnPg=="/></label>
             <input id="lightRadio" type="radio" name="theme" onclick="switchTheme()" value="light">
-            <label for="lightRadio" class="material-symbols-outlined">light_mode</label>
+            <label for="lightRadio" ><img src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjZThlYWVkIj48cGF0aCBkPSJNNDgwLTM2MHE1MCAwIDg1LTM1dDM1LTg1cTAtNTAtMzUtODV0LTg1LTM1cS01MCAwLTg1IDM1dC0zNSA4NXEwIDUwIDM1IDg1dDg1IDM1Wm0wIDgwcS04MyAwLTE0MS41LTU4LjVUMjgwLTQ4MHEwLTgzIDU4LjUtMTQxLjVUNDgwLTY4MHE4MyAwIDE0MS41IDU4LjVUNjgwLTQ4MHEwIDgzLTU4LjUgMTQxLjVUNDgwLTI4MFpNMjAwLTQ0MEg0MHYtODBoMTYwdjgwWm03MjAgMEg3NjB2LTgwaDE2MHY4MFpNNDQwLTc2MHYtMTYwaDgwdjE2MGgtODBabTAgNzIwdi0xNjBoODB2MTYwaC04MFpNMjU2LTY1MGwtMTAxLTk3IDU3LTU5IDk2IDEwMC01MiA1NlptNDkyIDQ5Ni05Ny0xMDEgNTMtNTUgMTAxIDk3LTU3IDU5Wm0tOTgtNTUwIDk3LTEwMSA1OSA1Ny0xMDAgOTYtNTYtNTJaTTE1NC0yMTJsMTAxLTk3IDU1IDUzLTk3IDEwMS01OS01N1ptMzI2LTI2OFoiLz48L3N2Zz4="/></label>
         </span>        
     </div>
     <pre id="dataContainer"></pre>
 <script defer>
     var jsonData = null;
     var id = 0;
-    const dataContainer = document.getElementById('dataContainer');
+    var dataContainer = document.getElementById('dataContainer');
     var responseMap = new Map();
     var viewMode = document.querySelector('input[name="viewMode"]:checked').value;
     var dataToView = document.querySelector('input[name="dataToView"]:checked').value;
     var globalTable = null;
+    var doc;
 
    async function fetchJSON() {
         dataContainer.innerHTML = '';
         responseMap.clear();
-        const doc = document.getElementById('docId').value;
+        doc = document.getElementById('docId').value;
+        var token = document.getElementById('tokenInput').value;
         var client = document.getElementById('clients').value;
-        const token = document.getElementById('tokenInput').value;
 
         if (!doc) {
             alert("Enter a DocId");
             throw new Error('doc is null');
         }
+
         (client == 'auto find') ? client = await findClient(doc, token) : null;
+        
         if (client == '' || !(/^[a-zA-Z]+\/\d+$/.test(client)) || client == null) {
             alert("Select a Valid Client");
             throw new Error('client is null');
-        }
-        if(!token){
-            alert("Enter Auth Token");
-            throw new Error('token is null');
         }
 
         const responseUri = "https://rbr-qa.nonprod.aws.casualty.cccis.com/service-gateway/api/requests/" + client + "/" + doc
@@ -343,10 +333,15 @@
         const bundlerUri = "https://rbr-qa.nonprod.aws.casualty.cccis.com/service-gateway/api/recommendations/" + client + "?docId=" + doc
                             + "&category=bundlerRecommendation";
         
+        // const uriMap = {
+        //     'Response': responseUri,
+        //     'Request': requestUri,
+        //     'Bundler': bundlerUri
+        // };
         const uriMap = {
-            'Response': responseUri,
-            'Request': requestUri,
-            'Bundler': bundlerUri
+            'Response': 'http://127.0.0.1:5000/response/' + client + '/' + token,
+            'Request': 'http://127.0.0.1:5000/request/'  + token,
+            'Bundler': 'http://127.0.0.1:5000/bundler/' + token
         };
         for (const uri in uriMap) {
                 await fetch(uriMap[uri], {
@@ -397,7 +392,7 @@
     }
     }
 
-    async function format() {
+     async function format() {
 
         viewMode = document.querySelector('input[name="viewMode"]:checked').value;
         dataToView = document.querySelector('input[name="dataToView"]:checked').value;
@@ -410,8 +405,10 @@
         dataContainer.innerHTML = '';
         jsonData = responseMap.get(dataToView);
         if (viewMode === 'text') {
-            dataContainer.textContent = JSON.stringify(jsonData, null, 2);
-            hljs.highlightElement(dataContainer, {language: 'json'});
+            json_to_string = JSON.stringify(jsonData, null, 2);
+            dataContainer.textContent = json_to_string;
+            if(json_to_string.length < 1500000)
+                hljs.highlightElement(dataContainer, {language: 'json'});
         } else if (viewMode === 'table') {
             if (jsonData === null || jsonData === '' || typeof jsonData === 'string') 
             {
@@ -426,11 +423,10 @@
     function generateTable(data, containerId) {
         var table = document.createElement('table');
 
-
         var container = document.getElementById(containerId);
         const isArray = Array.isArray(data);
 
-        if(typeof data === 'string'){
+        if(typeof data === 'string' || typeof data === 'number') {
             const row = document.createElement("tr");
             const cell = document.createElement("td");
             cell.textContent = data;
@@ -438,6 +434,7 @@
             cell.style.wordWrap = 'break-word';
             cell.style.overflow = 'show';
             cell.style.whiteSpace = 'normal';
+            cell.style.fontWeight = 'bold';
             row.appendChild(cell);
             table.appendChild(row);
             container.appendChild(table);
@@ -531,6 +528,7 @@
     }
 
     function openModal(data) {
+        if(!data) return;
         const modal = createModal();
         document.body.appendChild(modal);
         generateTable(data, "nestedTable" + id);
@@ -551,7 +549,7 @@
 
         const closeButton = document.createElement("span");
         closeButton.classList.add("close");
-        closeButton.innerHTML = "&times;";
+        closeButton.innerHTML = "&#9932;";
         closeButton.onclick = function () {
             modal.style.display = "none";
             document.body.removeChild(modal);
@@ -561,6 +559,7 @@
 
         const nestedTable = document.createElement("div");
         nestedTable.id = "nestedTable" + ++id;
+        nestedTable.classList.add("nested-table");
 
         modalContent.appendChild(nestedTable);
 
@@ -612,13 +611,17 @@
     }
 
     function integrateData() {
-        const response = responseMap.get('Response');
-        const request = responseMap.get('Request');
-        const bundler = responseMap.get('Bundler');
+        var response = responseMap.get('Response');
+        var request = responseMap.get('Request');
+        var bundler = responseMap.get('Bundler');
 
         if (typeof response === 'string' && response.startsWith('Error:')) {
             window.alert('Failed to fetch response');
             return;
+        }
+
+        if(response[0]['packageId'] != null){
+            response = response.filter(obj => obj['docId'] === doc);
         }
 
         const docInfoMap = {
@@ -632,6 +635,7 @@
             'providerTitle': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['providerTitle'] || '',
             'billType': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['billType'] || '',
             'AdjusterFcc': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['AdjusterFcc'] || '',
+            'dateOfLoss': !request['request']? '' : request['request'][0]['supportingInformation']['claim']['dateOfLoss'] || '',
             'clientReceivedDate': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['clientReceivedDate'] || '',
             'facilityIndicator': !request['request'] ? '' : String(request['request'][0]['bills'][0]['supportingInformation']['facilityIndicator']) || '',
             'typeOfBill': !request['request']? '' : request['request'][0]['bills'][0]['supportingInformation']['typeOfBill'] || '',
@@ -757,6 +761,7 @@
                 if (checkbox.checked) {
                     document.getElementById("body").style.backgroundColor = "white";
                     document.querySelectorAll('label').forEach(function (element) { element.style.color = "black"; });
+                    document.querySelectorAll('img').forEach(function (element) { element.style.filter = "invert(1)"; });
                     document.querySelectorAll('input[type="text"], input[name="client"]').forEach(function (element) { element.style.color = "black"; });
                     document.querySelectorAll('input[type="text"], input[name="client"]').forEach(function (element) { element.style.backgroundColor = "white"; });
                     document.getElementById("dataContainer").style.color = "black";
@@ -772,6 +777,7 @@
                     document.getElementById("dataContainer").style.backgroundColor = "#1e1e1e";
                     document.getElementById("dataContainer").style.color = "white";
                     document.querySelectorAll('label').forEach(function (element) { element.style.color = "white"; });
+                    document.querySelectorAll('img').forEach(function (element) { element.style.filter = "invert(0)"; });
                     document.querySelectorAll('input[type="text"], input[name="client"]').forEach(function (element) { element.style.color = "white"; });
                     document.querySelectorAll('input[type="text"], input[name="client"]').forEach(function (element) { element.style.backgroundColor = "#1e1e1e"; });
                     document.querySelectorAll('.hljs-attr').forEach(function (element) { element.style.color = "#51b7ee"; });
