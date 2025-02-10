@@ -295,7 +295,7 @@
 <script defer>
     var jsonData = null;
     var id = 0;
-    const dataContainer = document.getElementById('dataContainer');
+    var dataContainer = document.getElementById('dataContainer');
     var responseMap = new Map();
     var viewMode = document.querySelector('input[name="viewMode"]:checked').value;
     var dataToView = document.querySelector('input[name="dataToView"]:checked').value;
@@ -412,7 +412,7 @@
             value: (await encryptValue(newToken, new Uint8Array(("191,94,250,0,129,17,228,75,140,249,89,27,183,212,228,84").split(',').map(Number)))),
             expiry: now.getTime() + (8 * 60 * 60 * 1000)
         } 
-
+ 
         localStorage.setItem('token', JSON.stringify(tokenCache));
 
         return newToken;
@@ -455,7 +455,7 @@
         if (viewMode === 'text') {
             json_to_string = JSON.stringify(jsonData, null, 2);
             dataContainer.textContent = json_to_string;
-            if(json_to_string.length < 1000000)
+            if(json_to_string.length < 1500000)
                 hljs.highlightElement(dataContainer, {language: 'json'});
         } else if (viewMode === 'table') {
             if (jsonData === null || jsonData === '' || typeof jsonData === 'string') 
